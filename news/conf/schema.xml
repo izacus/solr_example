@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<schema name="default" version="1.1">
+  <types>
+    <fieldtype name="string"  class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="date" class="solr.TrieDateField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.LongField" />
+
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.ClassicFilterFactory" />
+        <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.ASCIIFoldingFilterFactory" />
+        <filter class="si.virag.solr.RdrLemmatizerFactory" dictionary="/home/jernej/Workspace/solr-41/lemmagen/data/lem-me-sl.bin" />
+        <filter class="solr.ShingleFilterFactory" maxShingleSize="3" outputUnigrams="true" />
+      </analyzer>
+      <analyzer type="query">
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.ClassicFilterFactory" />
+        <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.ASCIIFoldingFilterFactory" />
+        <filter class="si.virag.solr.RdrLemmatizerFactory" dictionary="/home/jernej/Workspace/solr-41/lemmagen/data/lem-me-sl.bin" />
+        <filter class="solr.ShingleFilterFactory" maxShingleSize="3" outputUnigrams="true" />
+      </analyzer>
+    </fieldType>
+  </types>
+
+  <fields>
+      <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
+      <field name="id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+      <!-- Name, caption or title -->
+      <field name="title" type="text" indexed="true" stored="true" multiValued="false" required="true" />
+      <field name="source" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+      <field name="source_url" type="string" indexed="false" stored="true" multiValued="false" required="true" />
+      <field name="language" type="string" indexed="true" stored="true" multiValued="false" required="false" />
+      <field name="content" type="text" indexed="true" stored="true" multiValued="false" required="false" />
+      <field name="published" type="date" indexed="true" stored="true" multiValued="false" required="true" />
+      <field name="all_text" type="text" indexed="true" stored="true" multiValued="true" required="true" />
+  </fields>
+
+  <!-- field to use to determine and enforce document uniqueness. -->
+  <uniqueKey>id</uniqueKey>
+
+  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
+  <defaultSearchField>all_text</defaultSearchField>
+
+  <copyField source="title" dest="all_text" />
+  <copyField source="content" dest="all_text" />
+  <copyField source="source" dest="all_text" />
+
+  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
+  <solrQueryParser defaultOperator="AND" />
+</schema>
