@@ -24,24 +24,24 @@
     <fieldType name="long" class="solr.LongField" />
 
     <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+      <!-- Transformation for text fields when document is indexed -->
       <analyzer type="index">
         <charFilter class="solr.HTMLStripCharFilterFactory"/>
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.ClassicFilterFactory" />
-        <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true" />
         <filter class="solr.LowerCaseFilterFactory" />
         <filter class="solr.ASCIIFoldingFilterFactory" />
-        <filter class="si.virag.solr.RdrLemmatizerFactory" dictionary="/home/jernej/Workspace/solr-41/lemmagen/data/lem-me-sl.bin" />
+        <filter class="solr.SnowballPorterFilterFactory" language="English" />
         <filter class="solr.ShingleFilterFactory" maxShingleSize="3" outputUnigrams="true" />
       </analyzer>
+      <!-- Transformation of search query -->
       <analyzer type="query">
         <charFilter class="solr.HTMLStripCharFilterFactory"/>
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.ClassicFilterFactory" />
-        <filter class="solr.StopFilterFactory" words="stopwords.txt" ignoreCase="true" />
         <filter class="solr.LowerCaseFilterFactory" />
         <filter class="solr.ASCIIFoldingFilterFactory" />
-        <filter class="si.virag.solr.RdrLemmatizerFactory" dictionary="/home/jernej/Workspace/solr-41/lemmagen/data/lem-me-sl.bin" />
+        <filter class="solr.SnowballPorterFilterFactory" language="English" />
         <filter class="solr.ShingleFilterFactory" maxShingleSize="3" outputUnigrams="true" />
       </analyzer>
     </fieldType>
@@ -54,8 +54,10 @@
       <field name="title" type="text" indexed="true" stored="true" multiValued="false" required="true" />
       <field name="source" type="string" indexed="true" stored="true" multiValued="false" required="true" />
       <field name="source_url" type="string" indexed="false" stored="true" multiValued="false" required="true" />
+      <!-- Language, to differentiate in results -->
       <field name="language" type="string" indexed="true" stored="true" multiValued="false" required="false" />
       <field name="content" type="text" indexed="true" stored="true" multiValued="false" required="false" />
+      <!-- Date field -->
       <field name="published" type="date" indexed="true" stored="true" multiValued="false" required="true" />
       <field name="all_text" type="text" indexed="true" stored="true" multiValued="true" required="true" />
   </fields>
@@ -66,6 +68,8 @@
   <!-- field for the QueryParser to use when an explicit fieldname is absent -->
   <defaultSearchField>all_text</defaultSearchField>
 
+  <!-- This will copy content of title, content and source fields into field named all_text when document is inserted.
+       all_text field should not be present in the document inserted. -->
   <copyField source="title" dest="all_text" />
   <copyField source="content" dest="all_text" />
   <copyField source="source" dest="all_text" />

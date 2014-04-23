@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+  <luceneMatchVersion>LUCENE_47</luceneMatchVersion>
+  <!--  The DirectoryFactory to use for indexes.
+        solr.StandardDirectoryFactory, the default, is filesystem based.
+        solr.RAMDirectoryFactory is memory based, not persistent, and doesn't work with replication. -->
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.StandardDirectoryFactory}"/>
+
+  <dataDir>${solr.en.data.dir:}</dataDir>
+
+  <updateHandler class="solr.DirectUpdateHandler2">
+    <updateLog>
+      <str name="dir">${solr.en.data.dir:}</str>
+    </updateLog>
+  </updateHandler>
+
+  <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+  </requestDispatcher>
+
+  <!-- These are lists of REST endpoint handlers and their configuration -->
+
+  <!-- Search Handler handles search queries, it'll be available on /select endpoint -->
+  <requestHandler name="/select" class="solr.SearchHandler" default="true">
+    <lst name="defaults">
+      <str name="defType">edismax</str>
+      <!-- Title matches are 4x as important as content matches. all_text matches are less important. -->
+      <str name="qt">title^4.0 content all_text^0.4</str>
+      <!-- We want to return results in JSON format -->
+      <str name="wt">json</str>
+      <str name="json.nl">map</str>
+
+      <!-- Highlighting is enabled for titles and contents - excerpts from those fields will be returned in results -->
+      <str name="hl">true</str>
+      <str name="hl.fl">title,content</str>
+      <str name="f.title.hl.fragsize">0</str>
+      <!-- By default search over those fields -->
+      <str name="fl">id,title,published,source,source_url,content</str>
+    </lst>
+
+  </requestHandler>
+
+  <!-- This handles handles new document insertions and updates -->
+  <requestHandler name="/update" class="solr.UpdateRequestHandler" />
+
+</config>
+
